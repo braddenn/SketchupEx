@@ -9,6 +9,8 @@
 # 	IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 # 	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #####################################################
+
+module SketchUpEx
 #
 # First block
 #
@@ -113,4 +115,5 @@ points.each do |pt|
 	end
 end
 p "final pointMin is #{pointMin}"
-	
+
+end #module

@@ -1,14 +1,14 @@
 #####################################################
-#	ex_align.rb
-#	by Brad Denniston   Copyright (c) 2015
+#  ex_align.rb
+#  by Brad Denniston   Copyright (c) 2015
 #
-#	THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
-# 	IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
-# 	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+#  THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+#   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+#   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #####################################################
-# First pull in the standard API hooks.
-require 'sketchup.rb'
-SKETCHUP_CONSOLE.show
+
+module SketchUpEx
+
 #
 # GLOBAL VARS ---------------------------------------
 #
@@ -19,97 +19,97 @@ $model = Sketchup.active_model
 #
 # makeBoxDef - add a 6-sided component definition called box
 #
-def makeBoxDef( length, width, height )
-	pts = Array.new
-	pts[0] = [0,0,0]
-	pts[1] = [length,0,0] # x
-	pts[2] = [length, width,0] # xy
-	pts[3] = [0,width,0]
-	pts[4] = [0, 0, height]
-	pts[5] = [0,width,height]
-	pts[6] = [length, width,height]
-	pts[7] = [length,0,height]
-	# add the points to the active model defining a face
-	definition = $model.definitions.add( "box"	)
-	definition.entities.add_face( pts[0],pts[1], pts[2], pts[3]) #base
-	definition.entities.add_face( pts[4],pts[5], pts[6], pts[7]) #top
-	definition.entities.add_face( pts[0],pts[4], pts[7], pts[1]) #x
-	definition.entities.add_face( pts[1],pts[7], pts[6], pts[2]) #xy
-	definition.entities.add_face( pts[2],pts[6], pts[5], pts[3]) #yx
-	definition.entities.add_face( pts[0],pts[3], pts[5], pts[4]) #y	
-	return definition
+def SketchUpEx.makeBoxDef( length, width, height )
+  pts = Array.new
+  pts[0] = [0,0,0]
+  pts[1] = [length,0,0] # x
+  pts[2] = [length, width,0] # xy
+  pts[3] = [0,width,0]
+  pts[4] = [0, 0, height]
+  pts[5] = [0,width,height]
+  pts[6] = [length, width,height]
+  pts[7] = [length,0,height]
+  # add the points to the active model defining a face
+  definition = $model.definitions.add( "box"  )
+  definition.entities.add_face( pts[0],pts[1], pts[2], pts[3]) #base
+  definition.entities.add_face( pts[4],pts[5], pts[6], pts[7]) #top
+  definition.entities.add_face( pts[0],pts[4], pts[7], pts[1]) #x
+  definition.entities.add_face( pts[1],pts[7], pts[6], pts[2]) #xy
+  definition.entities.add_face( pts[2],pts[6], pts[5], pts[3]) #yx
+  definition.entities.add_face( pts[0],pts[3], pts[5], pts[4]) #y  
+  return definition
 end
 #
 # make one instance at x,y,z of a ComponentDefinition
 #
-def makeInstanceOfDefAt(compDef, x, y, z)
-	trans = Geom::Transformation.translation([x,y,z])
-	$model.entities.add_instance(compDef, trans )
+def SketchUpEx.makeInstanceOfDefAt(compDef, x, y, z)
+  trans = Geom::Transformation.translation([x,y,z])
+  $model.entities.add_instance(compDef, trans )
 end
 #
 # align - put the x,y,z axis of instRotate in alignment with instRef
 #
-def align( instRef, instRotate )
-	# move the rotate inst to the ref inst
-	rotInitialOrigin = instRotate.transformation.origin
-	refOrigin = instRef.transformation.origin
-	moveAmount = refOrigin - rotInitialOrigin # make it negative
-	returnAmount = rotInitialOrigin - refOrigin
-	tempMoveTrans = Geom::Transformation.new moveAmount
-	instRotate.transform! tempMoveTrans
-	
-	# rotate zRot axis around cross
-	# get the angle
-	angle = get_angle( instRotate.transformation.zaxis, instRef.transformation.zaxis)
-	puts "angle Rot z to Ref z is #{angle *180/Math::PI}"
-	UI.messagebox "rotate Z by #{angle *180/Math::PI}"
-	# rotate
-	vector = instRef.transformation.zaxis.cross instRotate.transformation.zaxis
-	rotOrigin = instRotate.transformation.origin
-	tRot = Geom::Transformation.rotation rotOrigin, vector, angle
-	instRotate.transform! tRot
-	
-	UI.messagebox "first rotation - Z"
-	
-	# rotate xRot axis around cross
-	# get the angle
-	angle = get_angle( instRotate.transformation.xaxis, instRef.transformation.xaxis)
-	puts "angle x to x is #{angle *180/Math::PI}"
-	UI.messagebox "rotate X by #{angle *180/Math::PI}"
-	
-	# rotate
-	vector = instRef.transformation.xaxis.cross instRotate.transformation.xaxis
-	rotOrigin = instRotate.transformation.origin
-	tRot = Geom::Transformation.rotation rotOrigin, vector, angle
-	instRotate.transform! tRot
+def SketchUpEx.align( instRef, instRotate )
+  # move the rotate inst to the ref inst
+  rotInitialOrigin = instRotate.transformation.origin
+  refOrigin = instRef.transformation.origin
+  moveAmount = refOrigin - rotInitialOrigin # make it negative
+  returnAmount = rotInitialOrigin - refOrigin
+  tempMoveTrans = Geom::Transformation.new moveAmount
+  instRotate.transform! tempMoveTrans
+  
+  # rotate zRot axis around cross
+  # get the angle
+  angle = get_angle( instRotate.transformation.zaxis, instRef.transformation.zaxis)
+  puts "angle Rot z to Ref z is #{angle *180/Math::PI}"
+  UI.messagebox "rotate Z by #{angle *180/Math::PI}"
+  # rotate
+  vector = instRef.transformation.zaxis.cross instRotate.transformation.zaxis
+  rotOrigin = instRotate.transformation.origin
+  tRot = Geom::Transformation.rotation rotOrigin, vector, angle
+  instRotate.transform! tRot
+  
+  UI.messagebox "first rotation - Z"
+  
+  # rotate xRot axis around cross
+  # get the angle
+  angle = SketchUpEx.get_angle( instRotate.transformation.xaxis, instRef.transformation.xaxis)
+  puts "angle x to x is #{angle *180/Math::PI}"
+  UI.messagebox "rotate X by #{angle *180/Math::PI}"
+  
+  # rotate
+  vector = instRef.transformation.xaxis.cross instRotate.transformation.xaxis
+  rotOrigin = instRotate.transformation.origin
+  tRot = Geom::Transformation.rotation rotOrigin, vector, angle
+  instRotate.transform! tRot
 
-	UI.messagebox "second rotation - X"
+  UI.messagebox "second rotation - X"
 
-	#restore instRotate to original location
-	tempMoveTrans = Geom::Transformation.new returnAmount
-	instRotate.transform! tempMoveTrans
+  #restore instRotate to original location
+  tempMoveTrans = Geom::Transformation.new returnAmount
+  instRotate.transform! tempMoveTrans
 end
 #
 # get angle between 2 vectors with proper sign
 #
-def get_angle( vA, vB )
-	angle = vA.angle_between vB
-	# set the sign of the angle
-	diff = vA.normalize - vB.normalize
-	signAngle = diff.x  + diff.y + diff.z
-	if signAngle < 0 then angle = -angle end
-	return angle
+def SketchUpEx.get_angle( vA, vB )
+  angle = vA.angle_between vB
+  # set the sign of the angle
+  diff = vA.normalize - vB.normalize
+  signAngle = diff.x  + diff.y + diff.z
+  if signAngle < 0 then angle = -angle end
+  return angle
 end
 
-$boxDef1 = makeBoxDef( 2, 30, 15 )
-$boxDef2 = makeBoxDef( 10, 20, 30 )
+$boxDef1 = SketchUpEx.makeBoxDef( 2, 30, 15 )
+$boxDef2 = SketchUpEx.makeBoxDef( 10, 20, 30 )
 #make an instance of a box at 10,10,10
 makeInstanceOfDefAt($boxDef1, 10,10,10)
 inst0 = $boxDef1.instances[0]
 
-makeInstanceOfDefAt($boxDef2, -40,40,40)
+SketchUpEx.makeInstanceOfDefAt($boxDef2, -40,40,40)
 inst1 = $boxDef2.instances[0]
-makeInstanceOfDefAt($boxDef2, -40,40,40)
+SketchUpEx.makeInstanceOfDefAt($boxDef2, -40,40,40)
 inst2 = $boxDef2.instances[1]
 
 # set the rotation angle to 45 degrees
@@ -133,4 +133,5 @@ inst1.transform! tRot
 UI.messagebox "align them"
 align( inst0, inst1 )
 
+end #module
 

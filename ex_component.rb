@@ -1,39 +1,37 @@
 #####################################################
-#	ex_component.rb
-#	by Brad Denniston   Copyright (c) 2015
+#  ex_component.rb
+#  by Brad Denniston   Copyright (c) 2015
 #
-#	THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
-# 	IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
-# 	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+#  THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+#   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+#   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-#	Start with the base layout showing the man
+#  Start with the base layout showing the man
 #   This script is an example of:
-#		delete a component (delete the man)
-#		add a component to the model - a cube at the origin
-# 		print out the component entities
-#		move a component 10 to the right
+#    delete a component (delete the man)
+#    add a component to the model - a cube at the origin
+#     print out the component entities
+#    move a component 10 to the right
 #####################################################
 
-require 'sketchup.rb'
+module SketchUpEx
 
-printf "Deleted the man - check it out."
-
-def printComponents
-	componentdefinitions = Sketchup.active_model.definitions
-	index = 1
-	for componentdefinition in componentdefinitions
-		printf "\nComponent #{index} definition\n"
-		entities = componentdefinition.entities
-		num = entities.size
-		printf "Number of entities is #{num}\n"
-		for ent in entities
-			p "Entity type is #{ent.typename} with vertices"
-			for vert in ent.vertices
-				puts( "vert #{vert.position}")
-			end
-		end
-		index = index + 1
-	end
+def SketchUpEx.printComponents
+  componentdefinitions = Sketchup.active_model.definitions
+  index = 1
+  for componentdefinition in componentdefinitions
+    printf "\nComponent #{index} definition\n"
+    entities = componentdefinition.entities
+    num = entities.size
+    printf "Number of entities is #{num}\n"
+    for ent in entities
+      p "Entity type is #{ent.typename} with vertices"
+      for vert in ent.vertices
+        puts( "vert #{vert.position}")
+      end
+    end
+    index = index + 1
+  end
 end
 #
 # add a cube component
@@ -61,7 +59,7 @@ trans = Geom::Transformation.new # an empty, default transformation.
 Sketchup.active_model.active_entities.add_instance(new_comp_def, trans)
 #
 print "\nBuilt the cube component, now print it out"
-printComponents
+SketchUpEx.printComponents
 #
 # move_cube 10 to the right
 #
@@ -72,4 +70,6 @@ entities.transform_entities(transform, entities[0])
 
 # show the new entity values
 printf "\nmoved the cube 10 to the right\n"
-printComponents
+SketchUpEx.printComponents
+
+end #module

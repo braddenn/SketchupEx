@@ -1,13 +1,13 @@
 #####################################################
-#	ex_print.rb
-#	by Brad Denniston   Copyright 2014
+#  ex_print.rb
+#  by Brad Denniston   Copyright 2014
 #
-#	THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
-# 	IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
-# 	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+#  THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+#   IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+#   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #####################################################
 
-require 'sketchup.rb'
+module SketchUpEx
 
 point1 = Geom::Point3d.new 10,20,30
 point2 = Geom::Point3d.new 2,2,2
@@ -26,6 +26,8 @@ p point1.inspect  # like p point1 but puts quotes around output??
 p "p of #[point1.inspect} and quote - does not exppand #[...]"
 print "print of #[point1.inspect} and quote\n" # does not expand
 p( "using p - #{point1}" ) # works - but, follows number with \" meaning inches
+
+end #module
 
 
 
