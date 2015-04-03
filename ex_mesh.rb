@@ -1,5 +1,5 @@
 #####################################################
-#  SketchUpEx.mesh.rb
+#  ex_mesh.rb
 #  by Brad Denniston   Copyright (c) 2014
 #
 #  Demonstrate PolygonMesh methods
@@ -9,118 +9,126 @@
 #   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #####################################################
 
-module SketchUpEx
-#
-# add a cube component
-#
-$inst1
-$inst2
-$inst3
-#
-# cubecomp - build 3 cubes
-#
-def SketchUpEx.cubecomp
-  points = Array.new
-  points[0] = ORIGIN
-  points[1] = [10,0,0]
-  points[2] = [10,10,0]
-  points[3] = [0,10,0]
-  # create a component definition for the cube
-  new_comp_def = Sketchup.active_model.definitions.add("Cube size 10")
-  # create a face instance
-  newface = new_comp_def.entities.add_face(points)
-  # extend the face in the component definition into a cube
-  # If the z face is pointing up, reverse it.  
-  newface.reverse! if newface.normal.z < 0
-  newface.pushpull 10   # now this is the cube is defined
-  # an instance must be placed at some location, transform it
-  trans0 = Geom::Transformation.new # an empty, default transformation. 
-  # Create an instance of the Cube component. 
-  act_ents = Sketchup.active_model.active_entities
-  new_inst_index = act_ents.size - 1
-  act_ents.add_instance(new_comp_def, trans0)
-  $inst1 = act_ents[new_inst_index]
-  trans1 = Geom::Transformation.new([4,4,4])
-  $inst2 = act_ents.add_instance(new_comp_def, trans1)
-  $inst3 = act_ents.add_instance(new_comp_def, trans1)
-end
+module Mesh
 
-$face
-$mesh
-$mesh2
-$pts = Array.new
-#
-# SketchUpEx.makeAmesh
-#
-def SketchUpEx.makeAface
-  $mesh1 = Geom::PolygonMesh.new
-  $mesh2 = Geom::PolygonMesh.new
-  $pts[0] = ORIGIN
-  $pts[1] = [10,0,0]
-  $pts[2] = [10,10,0]
-  $pts[3] = [0,10,0]
-   # Add the face to the entities in the model
-   entities = Sketchup.active_model.active_entities
-   $face = entities.add_face($pts)
-   p "The face is #{$face}" # shows all 4 edges
-  # to_s is no different
-  # to_a is not defined
-   print "\n"
- end
-#
-# SketchUpEx.all_connected
-#
-def SketchUpEx.all_connected
-  connected = $face.all_connected
-  p "connected is #{connected}" # shows all edges
-  # to_a same as just connected.
-  print "\n"
-end
-#
-# SketchUpEx.makePolyMesh
-#
-def SketchUpEx.makePolyMesh
-index = $mesh1.add_polygon( $pts )
-  p "mesh1 index is #{index}"
-  # p "Mesh1 is #{$mesh1[index]}" so what does the index mean?
-  print "\n"
-end
-#
-# SketchUpEx.count
-#
-def SketchUpEx.count_points
-  index = $mesh2.add_polygon( $pts )
-  $pts[4] = [15,15,0]
-  $mesh2.add_point($pts[4]) # 5 sided
-  num = $mesh2.count_points
-  p "mesh2 point count is #{num}"
-  print "\n"
-end
-#
-# faceToMesh
-#
-def SketchUpEx.faceToMesh
-  $mesh1 = $face.mesh(7)
-  p "mesh1 is now #{$mesh1}"
-  print "\n"
-end
-#
-# SketchUpEx.point_at
-#
-def SketchUpEx.point_at
-  p "$mesh1 point at index 1 is #{$mesh1.point_at(1)}"
-  p "$mesh1 point at index 2 is #{$mesh1.point_at(2)}"
-  p "$mesh1 point at index 3 is #{$mesh1.point_at(3)}"
-  p "$mesh1 index of point at [0,10,0] is #{$mesh1.point_index($pts[3])}"
-  p "and $mesh1 points are #{$mesh1.points}"
-  print "\n"
-end
+  # create global variables
+  #
+  def self.reset
+    $inst1 = nil
+    $inst2 = nil
+    $inst3 = nil
+    $face = nil
+    $mesh = nil
+    $mesh2 = nil
+    $pts = Array.new
+  end
 
-SketchUpEx.makeAface
-SketchUpEx.all_connected
-SketchUpEx.makePolyMesh
-SketchUpEx.count_points
-SketchUpEx.point_at
+  # cubecomp - build 3 cubes
+  #
+  def self.cubecomp
+    points = Array.new
+    points[0] = ORIGIN
+    points[1] = [10,0,0]
+    points[2] = [10,10,0]
+    points[3] = [0,10,0]
+	
+    # create a component definition for the cube
+    new_comp_def = Sketchup.active_model.definitions.add("Cube size 10")
+	
+    # create a face instance
+    newface = new_comp_def.entities.add_face(points)
+	
+    # extend the face in the component definition into a cube
+    # If the z face is pointing up, reverse it.  
+    newface.reverse! if newface.normal.z < 0
+    newface.pushpull 10   # now this is the cube is defined
+	
+    # an instance must be placed at some location, transform it
+    trans0 = Geom::Transformation.new # an empty, default transformation. 
+	
+    # Create an instance of the Cube component. 
+    act_ents = Sketchup.active_model.active_entities
+    new_inst_index = act_ents.size - 1
+    act_ents.add_instance(new_comp_def, trans0)
+    $inst1 = act_ents[new_inst_index]
+    trans1 = Geom::Transformation.new([4,4,4])
+    $inst2 = act_ents.add_instance(new_comp_def, trans1)
+    $inst3 = act_ents.add_instance(new_comp_def, trans1)
+  end
+
+  # makeAface
+  #
+  def self.makeAface
+    $mesh1 = Geom::PolygonMesh.new
+    $mesh2 = Geom::PolygonMesh.new
+    $pts[0] = ORIGIN
+    $pts[1] = [10,0,0]
+    $pts[2] = [10,10,0]
+    $pts[3] = [0,10,0]
+	
+    # Add the face to the entities in the model
+    entities = Sketchup.active_model.active_entities
+    $face = entities.add_face($pts)
+    p "The face is #{$face}" # shows all 4 edges
+    # to_s is no different
+    # to_a is not defined
+    print "\n"
+   end
+
+  # all_connected
+  #
+  def self.all_connected
+    connected = $face.all_connected
+    p "connected is #{connected}" # shows all edges
+    # to_a same as just connected.
+    print "\n"
+  end
+
+  # makePolyMesh
+  #
+  def self.makePolyMesh
+    index = $mesh1.add_polygon( $pts )
+    p "mesh1 index is #{index}"
+    # p "Mesh1 is #{$mesh1[index]}" so what does the index mean?
+    print "\n"
+  end
+
+  # count_points
+  #
+  def self.count_points
+    index = $mesh2.add_polygon( $pts )
+    $pts[4] = [15,15,0]
+    $mesh2.add_point($pts[4]) # 5 sided
+    num = $mesh2.count_points
+    p "mesh2 point count is #{num}"
+    print "\n"
+  end
+
+  # faceToMesh
+  #
+  def self.faceToMesh
+    $mesh1 = $face.mesh(7)
+    p "mesh1 is now #{$mesh1}"
+    print "\n"
+  end
+
+  # point_at
+  #
+  def self.point_at
+    p "$mesh1 point at index 1 is #{$mesh1.point_at(1)}"
+    p "$mesh1 point at index 2 is #{$mesh1.point_at(2)}"
+    p "$mesh1 point at index 3 is #{$mesh1.point_at(3)}"
+    p "$mesh1 index of point at [0,10,0] is #{$mesh1.point_index($pts[3])}"
+    p "and $mesh1 points are #{$mesh1.points}"
+    print "\n"
+  end
+
+  self.reset
+  self.makeAface
+  self.all_connected
+  self.makePolyMesh
+  self.count_points
+  self.point_at
 
 end #module
 

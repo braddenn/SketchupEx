@@ -13,92 +13,92 @@
 #   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #####################################################
 
-module SketchUpEx
-#
-# add a cube component at the origin, pass in the size
-#
-def SketchUpEx.addCubeDef (size)
-  points = Array.new
-  points[0] = ORIGIN
-  points[1] = [size,0,0]
-  points[2] = [size,size,0]
-  points[3] = [0,size,0]
+module Transform2
 
-  new_comp_def = Sketchup.active_model.definitions.add("Cube size #{size}")
+  # add a cube component at the origin, pass in the size
+  #
+  def self.addCubeDef (size)
+    points = Array.new
+    points[0] = ORIGIN
+    points[1] = [size,0,0]
+    points[2] = [size,size,0]
+    points[3] = [0,size,0]
 
-  # add the points to the active model by defining a face
-  newface = new_comp_def.entities.add_face(points)
+    new_comp_def = Sketchup.active_model.definitions.add("Cube size #{size}")
 
-  # extend the face in the component definition into a cube
-  # If the z face is pointing up, reverse it.  
-  newface.reverse! if newface.normal.z < 0
-  newface.pushpull size   # now the cube is defined
-end
-#
-# generate 3 cube definitions
-#
-def SketchUpEx.create3CubeDefs
-  SketchUpEx.addCubeDef(5)
-  SketchUpEx.addCubeDef(10)
-  SketchUpEx.addCubeDef(20)
-  defs = Sketchup.active_model.definitions
-  p "There are #{defs.length} definitions, [0] is the engineer"
-end
-#
-# add an instances of each cube
-#
-def SketchUpEx.generateInstances
-  entities = Sketchup.active_model.active_entities
-  defs = Sketchup.active_model.definitions
-  [1,2,3].each do
+    # add the points to the active model by defining a face
+    newface = new_comp_def.entities.add_face(points)
+
+    # extend the face in the component definition into a cube
+    # If the z face is pointing up, reverse it.  
+    newface.reverse! if newface.normal.z < 0
+    newface.pushpull size   # now the cube is defined
+  end
+
+  # generate 3 cube definitions
+  #
+  def self.create3CubeDefs
+    self.addCubeDef(5)
+    self.addCubeDef(10)
+    self.addCubeDef(20)
+    defs = Sketchup.active_model.definitions
+    p "There are #{defs.length} definitions, [0] is the engineer"
+  end
+
+  # add an instances of each cube
+  #
+  def self.generateInstances
+    entities = Sketchup.active_model.active_entities
+    defs = Sketchup.active_model.definitions
+    [1,2,3].each do
     |n|
     # an instance must be placed at some location
     trans = Geom::Transformation.new([0,0,0])
     inst = entities.add_instance(defs[n], trans)
     p "definition #{n} has #{defs[n].instances.length} instances"
     p "NOTE: from the display, the transform point sets the bottom, left, front of the instance"
+    end
   end
-end
-#
-# rotate the instances
-#
-def SketchUpEx.rotateInstances
-  defs = Sketchup.active_model.definitions
-  #pt = blf of each instance
-  angle = Math::PI/4
-  # yes, this could be done with loops, try it
-  # its just easier to follow if not in a loop
+
+  # rotate the instances
   #
-  # instance 1
-  inst = defs[1].instances[0]
-  t = inst.transformation
-  pt = t.origin # of this instance
-  vector = Geom::Vector3d.new 1,0,0 # rotate around x axis
-  transformation = Geom::Transformation.rotation pt, vector, angle
-  inst.transform! transformation
+  def self.rotateInstances
+    defs = Sketchup.active_model.definitions
+    #pt = blf of each instance
+    angle = Math::PI/4
+    # yes, this could be done with loops, try it
+    # its just easier to follow if not in a loop
+    #
+    # instance 1
+    inst = defs[1].instances[0]
+    t = inst.transformation
+    pt = t.origin # of this instance
+    vector = Geom::Vector3d.new 1,0,0 # rotate around x axis
+    transformation = Geom::Transformation.rotation pt, vector, angle
+    inst.transform! transformation
+    #
+    # instance 2
+    inst = defs[2].instances[0]
+    t = inst.transformation
+    pt = t.origin # of this instance
+    vector = Geom::Vector3d.new 0,1,0 # rotate around y axis
+    transformation = Geom::Transformation.rotation pt, vector, angle
+    inst.transform! transformation
+    #
+    # instance 3
+    inst = defs[3].instances[0]
+    t = inst.transformation
+    pt = t.origin # of this instance
+    vector = Geom::Vector3d.new 0,0,1 # rotate around z axis
+    transformation = Geom::Transformation.rotation pt, vector, angle
+    inst.transform! transformation
+  end
+
+  # move the cubes 
   #
-  # instance 2
-  inst = defs[2].instances[0]
-  t = inst.transformation
-  pt = t.origin # of this instance
-  vector = Geom::Vector3d.new 0,1,0 # rotate around y axis
-  transformation = Geom::Transformation.rotation pt, vector, angle
-  inst.transform! transformation
-  #
-  # instance 3
-  inst = defs[3].instances[0]
-  t = inst.transformation
-  pt = t.origin # of this instance
-  vector = Geom::Vector3d.new 0,0,1 # rotate around z axis
-  transformation = Geom::Transformation.rotation pt, vector, angle
-  inst.transform! transformation
-end
-#
-# move the cubes 
-#
-def SketchUpEx.moveCubeInstances
-  defs = Sketchup.active_model.definitions
-  [1,2,3].each do
+  def self.moveCubeInstances
+    defs = Sketchup.active_model.definitions
+    [1,2,3].each do
     |n|
     defs[n].instances.each do 
       |i|
@@ -106,42 +106,44 @@ def SketchUpEx.moveCubeInstances
       p "#{i.transformation.to_a}"
       transform = Geom::Transformation.new([10*n,15*n,10*n])
       p "transform from 0,0,0 to #{10*n}, #{15*n}, #{10*n}"
-#       i.move! transform # move! doesn't update the display
+  #       i.move! transform # move! doesn't update the display
       i.transform! transform
       p "After move transform of instance #{n} is:"
       p "#{i.transformation.to_a}"
     end
+    end
   end
-end
-#
-# translate cube 3
-#
-def SketchUpEx.translate
-  defs = Sketchup.active_model.definitions
-  d = defs[3]
-  v = Geom::Vector3d.new 10,10,10 # 45 degree angle
-  t = Geom::Transformation.translation v
-  i = d.instances[0]
-  [1,2,3,4,5].each do
+
+  # translate cube 3
+  #
+  def self.translate
+    defs = Sketchup.active_model.definitions
+    d = defs[3]
+    v = Geom::Vector3d.new 10,10,10 # 45 degree angle
+    t = Geom::Transformation.translation v
+    i = d.instances[0]
+    [1,2,3,4,5].each do
     |k|
     i.transform! t
     p "After translate transform of instance is:"
     p "#{i.transformation.to_a}"
+    end
   end
-end
 
-UI.messagebox "add 3 cube definitions - nothing will be displayed"
-SketchUpEx.create3CubeDefs
-UI.messagebox "add and show 1 instance for each definition"
-SketchUpEx.generateInstances
-UI.messagebox "move the instances"
-SketchUpEx.moveCubeInstances
-UI.messagebox "rotate the instances"
-SketchUpEx.rotateInstances
-UI.messagebox "translate instance #3 5 times in the same direction"
-SketchUpEx.translate
+  UI.messagebox "add 3 cube definitions - nothing will be displayed"
+  self.create3CubeDefs
+  UI.messagebox "add and show 1 instance for each definition"
+  self.generateInstances
+  UI.messagebox "move the instances"
+  self.moveCubeInstances
+  UI.messagebox "rotate the instances"
+  self.rotateInstances
+  UI.messagebox "translate instance #3 5 times in the same direction"
+  self.translate
 
-end #module
+end # module
+
+
 
 
 

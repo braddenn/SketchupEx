@@ -13,22 +13,22 @@
 #   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #####################################################
 
-module SketchUpEx
-#
+module Transform4
+
 # GLOBAL VARS ---------------------------------------
 #
-$all_instances = Array.new   # normalized and sorted array of instances
-$exp_ents = Array.new    # all entities of one exploded instance
-$quadDef
-$pyramidDef
-$cubeDef
-$model = Sketchup.active_model
-#
-# UTILITIES ----------------------------------------------
-#
+def self.reset
+  $all_instances = Array.new   # normalized and sorted array of instances
+  $exp_ents = Array.new    # all entities of one exploded instance
+  $quadDef = nil
+  $pyramidDef = nil
+  $cubeDef = nil
+  $model = Sketchup.active_model
+end
+
 # makeCubeDef - add a 6-sided component definition called box
 #
-def SketchUpEx.makeBoxDef( length, width, height )
+def self.makeBoxDef( length, width, height )
   pts = Array.new
   pts[0] = [0,0,0]
   pts[1] = [length,0,0] # x
@@ -48,28 +48,26 @@ def SketchUpEx.makeBoxDef( length, width, height )
   definition.entities.add_face( pts[0],pts[3], pts[5], pts[4]) #y  
   return definition
 end
-#
-# OPERATIONS
-#
+
 # makeDef - create a definition for a box
 #
-def SketchUpEx.makeDefs
+def self.makeDefs
   puts "make a box def of 60,30,15"
-  $cubeDef = SketchUpEx.makeBoxDef( 60, 30, 15 )
+  $cubeDef = self.makeBoxDef( 60, 30, 15 )
 end
-#
+
 # make one instance at x,y,z of a ComponentDefinition
 #
-def SketchUpEx.makeInstanceDefAt(compDef, x, y, z)
+def self.makeInstanceDefAt(compDef, x, y, z)
   trans = Geom::Transformation.translation([x,y,z])
   $model.entities.add_instance(compDef, trans )
 end
-#
+
 # move - move an instance to x, y, and z
 # inst - the instance to be moved
 # params: destination x,y,z
 #
-def SketchUpEx.move( inst, x, y, z )
+def self.move( inst, x, y, z )
   puts "before move of #{x}, #{y}, #{z} inst transformation is:"
   puts "#{inst.transformation.to_a}"
   puts "and origin is #{inst.transformation.origin.to_a}"
@@ -79,12 +77,12 @@ def SketchUpEx.move( inst, x, y, z )
   puts "#{inst.transformation.to_a}"
   puts "and origin is #{inst.transformation.origin.to_a}"
 end # move
-#
+
 # translate an instance by x, y, and z
 # inst - the instance to be translated
 # params: vector x, y, and z
 #
-def SketchUpEx.translate( inst, x, y, z )
+def self.translate( inst, x, y, z )
   puts "before translation of #{x}, #{y}, #{z} inst transformation is:"
   puts "#{inst.transformation.to_a}"
   puts "and origin is #{inst.transformation.origin.to_a}"
@@ -95,52 +93,55 @@ def SketchUpEx.translate( inst, x, y, z )
   puts "#{inst.transformation.to_a}"
   puts "and origin is #{inst.transformation.origin.to_a}"
 end # translate
-#
+
 # rotate - add to rotation
 # inst - the instance to be rotated
 # point - start of vector of rotation
 # vector - line through point that inst rotates around
 # angle - radians of rotation
 #
-def SketchUpEx.rotate( inst, point, vector, angle )
+def self.rotate( inst, point, vector, angle )
   puts "before rotation inst transformation is:"
   puts "#{inst.transformation.to_a}"
   puts "origin is #{inst.transformation.origin.to_a}"
-  transformation = Geom::Transformation.rotation pt, vector, angle
+  transformation = Geom::Transformation.rotation point, vector, angle
   inst.transform! transformation
   puts "after rotation inst transformation is:"
   puts "#{inst.transformation.to_a}"
   puts "and origin is #{inst.transformation.origin.to_a}"
 end #rotate
 
-SketchUpEx.makeDefs
-SketchUpEx.makeInstanceDefAt($cubeDef, 5,10,15)
+self.reset
+self.makeDefs
+self.makeInstanceDefAt($cubeDef, 5,10,15)
 
 angle = Math::PI/8
 
 inst = $cubeDef.instances[0]
 puts "using rectangle at origin (5,10,15)."
 UI.messagebox "will translate rectangle by 10,15,20"
-SketchUpEx.translate( inst, 10, 15, 20)
+self.translate( inst, 10, 15, 20)
 UI.messagebox "translated rectangle by 10,15,20"
 
 inst = $cubeDef.instances[0]
 puts "using rectangle at origin (5,10,15)"
 UI.messagebox "will translate rectangle by 10,15,20"
-SketchUpEx.translate( inst, 10, 15, 20)
+self.translate( inst, 10, 15, 20)
 UI.messagebox "translated rectangle by 10,15,20"
 
 inst = $cubeDef.instances[0]
 
-#UI.messagebox "will move rectangle by 15,15,15"
-#SketchUpEx.move( inst, 15,15,15 )
-#UI.messagebox "moved rectangle by 15,15,15"
+UI.messagebox "will move rectangle by 15,15,15"
+self.move( inst, 15,15,15 )
+UI.messagebox "moved rectangle by 15,15,15"
 
 UI.messagebox "will translate same rectangle by 10,15,20"
-SketchUpEx.translate( inst, 10, 15, 20)
+self.translate( inst, 10, 15, 20)
 
 UI.messagebox "will rotate rectangle 22.5 degrees around z"
-SketchUpEx.rotate( inst, 0,0,1, angle )
+vector = Geom::Vector3d.new 0,0,1
+pt = Geom::Point3d.new 10,20,30
+self.rotate( inst, pt, vector, angle )
 UI.messagebox "rotated rectangle 22.5 degrees around z"
 
 end #module

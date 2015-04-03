@@ -14,62 +14,64 @@
 #    move a component 10 to the right
 #####################################################
 
-module SketchUpEx
+module Component
 
-def SketchUpEx.printComponents
-  componentdefinitions = Sketchup.active_model.definitions
-  index = 1
-  for componentdefinition in componentdefinitions
-    printf "\nComponent #{index} definition\n"
-    entities = componentdefinition.entities
-    num = entities.size
-    printf "Number of entities is #{num}\n"
-    for ent in entities
-      p "Entity type is #{ent.typename} with vertices"
-      for vert in ent.vertices
-        puts( "vert #{vert.position}")
-      end
+  def self.printComponents
+    componentdefinitions = Sketchup.active_model.definitions
+    index = 1
+    for cd in componentdefinitions
+      printf "\nComponent #{index} definition\n"
+	  if index > 1 then
+	    entities = cd.entities
+        num = entities.size
+        printf "Number of entities is #{num}\n"
+        for ent in entities
+          p "Entity type is #{ent.typename} with vertices"
+          for vert in ent.vertices
+            puts( "vert #{vert.position}")
+          end
+        end
+	  end
+      index = index + 1
     end
-    index = index + 1
   end
-end
-#
-# add a cube component
-#
-points = Array.new
-points[0] = ORIGIN
-points[1] = [10,0,0]
-points[2] = [10,10,0]
-points[3] = [0,10,0]
 
-new_comp_def = Sketchup.active_model.definitions.add("Cube size 10")
+  # add a cube component
+  #
+  points = Array.new
+  points[0] = ORIGIN
+  points[1] = [10,0,0]
+  points[2] = [10,10,0]
+  points[3] = [0,10,0]
 
-# add the points to the active model defining a face
-newface = new_comp_def.entities.add_face(points)
+  new_comp_def = Sketchup.active_model.definitions.add("Cube size 10")
 
-# extend the face in the component definition into a cube
-# If the z face is pointing up, reverse it.  
-newface.reverse! if newface.normal.z < 0
-newface.pushpull 10   # now this is the cube is defined
+  # add the points to the active model defining a face
+  newface = new_comp_def.entities.add_face(points)
 
-# an instance must be placed at some location
-trans = Geom::Transformation.new # an empty, default transformation. 
+  # extend the face in the component definition into a cube
+  # If the z face is pointing up, reverse it.  
+  newface.reverse! if newface.normal.z < 0
+  newface.pushpull 10   # now this is the cube is defined
 
-# Create an instance of the Cube component. 
-Sketchup.active_model.active_entities.add_instance(new_comp_def, trans)
-#
-print "\nBuilt the cube component, now print it out"
-SketchUpEx.printComponents
-#
-# move_cube 10 to the right
-#
-xdelta = 10 # size of move
-entities = Sketchup.active_model.entities
-transform = Geom::Transformation.new([xdelta,0,0])
-entities.transform_entities(transform, entities[0])
+  # an instance must be placed at some location
+  trans = Geom::Transformation.new # an empty, default transformation. 
 
-# show the new entity values
-printf "\nmoved the cube 10 to the right\n"
-SketchUpEx.printComponents
+  # Create an instance of the Cube component. 
+  Sketchup.active_model.active_entities.add_instance(new_comp_def, trans)
+  #
+  print "\nBuilt the cube component, now print it out"
+  self.printComponents
+
+  # move_cube 10 to the right
+  #
+  xdelta = 10 # size of move
+  entities = Sketchup.active_model.entities
+  transform = Geom::Transformation.new([xdelta,0,0])
+  entities.transform_entities(transform, entities[0])
+
+  # show the new entity values
+  printf "\nmoved the cube 10 to the right\n"
+  self.printComponents
 
 end #module
